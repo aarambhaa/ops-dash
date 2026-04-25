@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeRoute Operator Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #E63946;
+            --secondary: #F1FAEE;
+            --dark: #1D3557;
+            --accent: #A8DADC;
+            --highlight: #457B9D;
+            --success: #06D6A0;
+            --warning: #FFB703;
+            --danger: #E63946;
+            --text: #1D3557;
+            --text-light: #457B9D;
+            --bg-main: #F8F9FA;
+            --sidebar-bg: #1D3557;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-main);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* Dashboard Layout */
+        .dashboard {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            background: var(--sidebar-bg);
+            color: white;
+            padding: 2rem 0;
+            position: fixed;
+            height: 100vh;
+            width: 280px;
+            overflow-y: auto;
+        }
+
+        .logo-container {
+            padding: 0 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .dashboard-logo {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .user-badge {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 12px;
+            margin: 0 2rem 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .user-info h4 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .user-info p {
+            font-size: 0.75rem;
+            color: var(--accent);
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 2rem;
+            color: var(--accent);
+            text-decoration: none;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: var(--primary);
+            transform: scaleY(0);
+            transition: transform 0.3s;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .nav-link.active::before {
+            transform: scaleY(1);
+        }
+
+        .nav-icon {
+            font-size: 1.3rem;
+        }
+
+        .nav-section {
+            padding: 1.5rem 2rem 0.5rem;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent);
+            font-weight: 700;
+            opacity: 0.6;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: 280px;
+            padding: 2rem 3rem;
+        }
+
+        /* Header */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
+
+        .page-title h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .page-title p {
+            color: var(--text-light);
+            font-size: 1.05rem;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.85rem 1.75rem;
+            border-radius: 10px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(230, 57, 70, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--dark);
+            border: 2px solid var(--accent);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+        }
+
+        /* Quick Stats */
+        .quick-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.75rem;
+            border-radius: 16px;
+            border-left: 4px solid var(--primary);
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card.success {
+            border-left-color: var(--success);
+        }
+
+        .stat-card.warning {
+            border-left-color: var(--warning);
+        }
+
+        .stat-card.danger {
+            border-left-color: var(--danger);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .stat-icon {
+            font-size: 1.5rem;
+            opacity: 0.6;
+        }
+
+        .stat-value {
+            font-family: 'Syne', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-change {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .stat-change.positive {
+            color: var(--success);
+        }
+
+        .stat-change.negative {
+            color: var(--danger);
+        }
+
+        /* Risk Analysis Section */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--secondary);
+        }
+
+        .card-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .card-action {
+            font-size: 0.9rem;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        /* Route Input Form */
+        .route-form {
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-input,
+        .form-select {
+            padding: 0.85rem 1rem;
+            border: 2px solid #E8E8E8;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .form-input:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1);
+        }
+
+        /* Risk Display */
+        .risk-display {
+            text-align: center;
+            padding: 2rem;
+            background: linear-gradient(135deg, var(--secondary) 0%, white 100%);
+            border-radius: 16px;
+            margin-bottom: 2rem;
+        }
+
+        .risk-percentage {
+            font-family: 'Syne', sans-serif;
+            font-size: 5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--warning) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .risk-classification {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 1rem;
+        }
+
+        .risk-badge {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .risk-badge.low {
+            background: rgba(6, 214, 160, 0.1);
+            color: var(--success);
+        }
+
+        .risk-badge.moderate {
+            background: rgba(255, 183, 3, 0.1);
+            color: var(--warning);
+        }
+
+        .risk-badge.high {
+            background: rgba(230, 57, 70, 0.1);
+            color: var(--danger);
+        }
+
+        /* Risk Factors */
+        .risk-factors {
+            display: grid;
+            gap: 1.25rem;
+        }
+
+        .risk-factor {
+            background: var(--secondary);
+            padding: 1.25rem;
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+
+        .risk-factor:hover {
+            background: var(--accent);
+            transform: translateX(5px);
+        }
+
+        .factor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .factor-name {
+            font-weight: 700;
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+
+        .factor-value {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .factor-bar {
+            width: 100%;
+            height: 8px;
+            background: white;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .factor-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success) 0%, var(--warning) 50%, var(--danger) 100%);
+            border-radius: 4px;
+            transition: width 0.6s ease;
+        }
+
+        .factor-description {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            line-height: 1.5;
+        }
+
+        /* Recommendations */
+        .recommendations {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .recommendation-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1.25rem;
+            background: var(--secondary);
+            border-radius: 12px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .recommendation-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .recommendation-content h4 {
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .recommendation-content p {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Scenario Simulation */
+        .scenario-controls {
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .slider-value {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #E8E8E8;
+            outline: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
+            transition: all 0.3s;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 12px rgba(230, 57, 70, 0.3);
+        }
+
+        /* Map Placeholder */
+        .map-container {
+            height: 400px;
+            background: linear-gradient(135deg, #A8DADC 0%, #457B9D 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .map-overlay {
+            position: absolute;
+            top: 1.5rem;
+            left: 1.5rem;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            color: var(--dark);
+        }
+
+        .map-legend {
+            display: flex;
+            gap: 1.5rem;
+            font-size: 0.85rem;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        /* Recent Analyses */
+        .recent-analyses {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .analysis-item {
+            display: grid;
+            grid-template-columns: auto 1fr auto auto;
+            gap: 1.5rem;
+            align-items: center;
+            padding: 1.25rem;
+            background: var(--secondary);
+            border-radius: 12px;
+            transition: all 0.3s;
+        }
+
+        .analysis-item:hover {
+            background: white;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+            transform: translateX(5px);
+        }
+
+        .analysis-date {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            font-weight: 600;
+        }
+
+        .analysis-route {
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .analysis-risk {
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .view-btn {
+            padding: 0.5rem 1.25rem;
+            background: var(--primary);
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .view-btn:hover {
+            background: var(--dark);
+        }
+
+        /* Full Width Sections */
+        .full-width-section {
+            margin-bottom: 2rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1400px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 1.5rem;
+            }
+
+            .quick-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+        }
+
+        /* Loading Animation */
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+
+        .loading {
+            animation: shimmer 2s infinite;
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 1000px 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo-container">
+                <div class="dashboard-logo">SafeRoute</div>
+            </div>
+
+            <div class="user-badge">
+                <div class="user-avatar">AA</div>
+                <div class="user-info">
+                    <h4>Aarambha Adhikari</h4>
+                    <p>Team Lead · Professional Plan</p>
+                </div>
+            </div>
+
+            <nav>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link active">
+                            <span class="nav-icon">📊</span>
+                            <span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <span class="nav-icon">🗺️</span>
+                            <span>Risk Analysis</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <span class="nav-icon">🔮</span>
+                            <span>Scenario Simulation</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <span class="nav-icon">📈</span>
+                            <span>Analytics</span>
+                        </a>
+                    </li>
+                    <li class="nav-section">Management</li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <span class="nav-icon">🚗</span>
+                            <span>Routes</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <span class="nav-icon">📋</span>
+                            <span>History</span>
+                        </a>
+                    </li>
+                    <li class="nav-section">Settings</li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <span class="nav-icon">⚙️</span>
+                            <span>Preferences</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <span class="nav-icon">👤</span>
+                            <span>Account</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <span class="nav-icon">🚪</span>
+                            <span>Logout</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="page-header">
+                <div class="page-title">
+                    <h1>Risk Assessment Dashboard</h1>
+                    <p>Real-time travel risk intelligence for Nepal's terrain</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-secondary">📥 Export Report</button>
+                    <button class="btn btn-primary">➕ New Analysis</button>
+                </div>
+            </header>
+
+            <!-- Quick Stats -->
+            <section class="quick-stats">
+                <div class="stat-card success">
+                    <div class="stat-header">
+                        <span class="stat-label">Routes Analyzed</span>
+                        <span class="stat-icon">🗺️</span>
+                    </div>
+                    <div class="stat-value">127</div>
+                    <div class="stat-change positive">↑ 12% this week</div>
+                </div>
+
+                <div class="stat-card warning">
+                    <div class="stat-header">
+                        <span class="stat-label">Avg Risk Level</span>
+                        <span class="stat-icon">⚠️</span>
+                    </div>
+                    <div class="stat-value">54%</div>
+                    <div class="stat-change">Moderate</div>
+                </div>
+
+                <div class="stat-card success">
+                    <div class="stat-header">
+                        <span class="stat-label">Safe Routes</span>
+                        <span class="stat-icon">✅</span>
+                    </div>
+                    <div class="stat-value">89</div>
+                    <div class="stat-change positive">↑ 8% this week</div>
+                </div>
+
+                <div class="stat-card danger">
+                    <div class="stat-header">
+                        <span class="stat-label">High Risk Alerts</span>
+                        <span class="stat-icon">🚨</span>
+                    </div>
+                    <div class="stat-value">12</div>
+                    <div class="stat-change negative">↑ 3 new</div>
+                </div>
+            </section>
+
+            <!-- Main Dashboard Grid -->
+            <div class="dashboard-grid">
+                <!-- Route Risk Analysis -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Route Risk Analysis</h2>
+                        <a href="#" class="card-action">View Details →</a>
+                    </div>
+
+                    <form class="route-form">
+                        <div class="form-group">
+                            <label class="form-label">Departure Point</label>
+                            <select class="form-select" id="departure">
+                                <option>Kathmandu</option>
+                                <option>Pokhara</option>
+                                <option>Chitwan</option>
+                                <option>Lumbini</option>
+                                <option>Bhaktapur</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Destination</label>
+                            <select class="form-select" id="destination">
+                                <option>Pokhara</option>
+                                <option>Kathmandu</option>
+                                <option>Chitwan</option>
+                                <option>Mustang</option>
+                                <option>Ilam</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Travel Date</label>
+                            <input type="date" class="form-input" id="travel-date" value="2026-04-28">
+                        </div>
+
+                        <button type="button" class="btn btn-primary" onclick="analyzeRoute()" style="width: 100%;">Analyze Route</button>
+                    </form>
+
+                    <div class="risk-display" id="risk-result" style="display: none;">
+                        <div class="risk-percentage" id="risk-percentage">68%</div>
+                        <div class="risk-classification">
+                            <span class="risk-badge moderate" id="risk-badge">Moderate Risk</span>
+                        </div>
+                        <p style="color: var(--text-light); margin-top: 1rem;">Based on weather, terrain, and historical data</p>
+                    </div>
+                </div>
+
+                <!-- Risk Factors Breakdown -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Risk Factors</h2>
+                    </div>
+
+                    <div class="risk-factors">
+                        <div class="risk-factor">
+                            <div class="factor-header">
+                                <span class="factor-name">🌧️ Weather Conditions</span>
+                                <span class="factor-value">45%</span>
+                            </div>
+                            <div class="factor-bar">
+                                <div class="factor-fill" style="width: 45%;"></div>
+                            </div>
+                            <p class="factor-description">Moderate rainfall expected. Road visibility may be reduced.</p>
+                        </div>
+
+                        <div class="risk-factor">
+                            <div class="factor-header">
+                                <span class="factor-name">⛰️ Landslide Risk</span>
+                                <span class="factor-value">72%</span>
+                            </div>
+                            <div class="factor-bar">
+                                <div class="factor-fill" style="width: 72%;"></div>
+                            </div>
+                            <p class="factor-description">High susceptibility zones detected along this route.</p>
+                        </div>
+
+                        <div class="risk-factor">
+                            <div class="factor-header">
+                                <span class="factor-name">🛣️ Road Conditions</span>
+                                <span class="factor-value">38%</span>
+                            </div>
+                            <div class="factor-bar">
+                                <div class="factor-fill" style="width: 38%;"></div>
+                            </div>
+                            <p class="factor-description">Generally well-maintained highway with minor rough patches.</p>
+                        </div>
+
+                        <div class="risk-factor">
+                            <div class="factor-header">
+                                <span class="factor-name">📊 Historical Data</span>
+                                <span class="factor-value">55%</span>
+                            </div>
+                            <div class="factor-bar">
+                                <div class="factor-fill" style="width: 55%;"></div>
+                            </div>
+                            <p class="factor-description">Previous disruptions reported during similar conditions.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recommendations Section -->
+            <div class="card full-width-section">
+                <div class="card-header">
+                    <h2 class="card-title">Actionable Recommendations</h2>
+                </div>
+
+                <div class="recommendations">
+                    <div class="recommendation-item">
+                        <div class="recommendation-icon">⏰</div>
+                        <div class="recommendation-content">
+                            <h4>Optimal Departure Time</h4>
+                            <p>Start journey between 6:00 AM - 8:00 AM to avoid afternoon rainfall and ensure maximum daylight for navigation.</p>
+                        </div>
+                    </div>
+
+                    <div class="recommendation-item">
+                        <div class="recommendation-icon">🚗</div>
+                        <div class="recommendation-content">
+                            <h4>Vehicle Preparation</h4>
+                            <p>Ensure 4WD capability and carry emergency equipment including tire chains, first aid kit, and extra fuel reserves.</p>
+                        </div>
+                    </div>
+
+                    <div class="recommendation-item">
+                        <div class="recommendation-icon">📱</div>
+                        <div class="recommendation-content">
+                            <h4>Monitor Live Updates</h4>
+                            <p>Check weather and road conditions every 2 hours. Alternative route via Mugling available if primary route deteriorates.</p>
+                        </div>
+                    </div>
+
+                    <div class="recommendation-item">
+                        <div class="recommendation-icon">👥</div>
+                        <div class="recommendation-content">
+                            <h4>Passenger Safety Briefing</h4>
+                            <p>Inform passengers about moderate risk conditions and expected travel time of 6-7 hours with rest stops.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scenario Simulation & Map -->
+            <div class="dashboard-grid">
+                <!-- Scenario Simulation -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Scenario Simulation</h2>
+                        <a href="#" class="card-action">Reset →</a>
+                    </div>
+
+                    <div class="scenario-controls">
+                        <div class="slider-group">
+                            <div class="slider-label">
+                                <span class="form-label">Rainfall Intensity</span>
+                                <span class="slider-value" id="rainfall-value">50 mm/h</span>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="slider" id="rainfall-slider" oninput="updateRainfall(this.value)">
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-label">
+                                <span class="form-label">Temperature</span>
+                                <span class="slider-value" id="temp-value">22°C</span>
+                            </div>
+                            <input type="range" min="0" max="40" value="22" class="slider" id="temp-slider" oninput="updateTemp(this.value)">
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-label">
+                                <span class="form-label">Wind Speed</span>
+                                <span class="slider-value" id="wind-value">15 km/h</span>
+                            </div>
+                            <input type="range" min="0" max="100" value="15" class="slider" id="wind-slider" oninput="updateWind(this.value)">
+                        </div>
+
+                        <button class="btn btn-primary" style="width: 100%;" onclick="runSimulation()">Run Simulation</button>
+                    </div>
+
+                    <div style="background: var(--secondary); padding: 1.5rem; border-radius: 12px; margin-top: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <strong>Simulated Risk:</strong>
+                            <span id="simulated-risk" style="color: var(--primary); font-weight: 700;">68%</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <strong>Risk Change:</strong>
+                            <span id="risk-change" style="color: var(--text-light);">—</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Geospatial Map -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">Route Visualization</h2>
+                        <a href="#" class="card-action">Fullscreen →</a>
+                    </div>
+
+                    <div class="map-container">
+                        <div class="map-overlay">
+                            <div class="map-legend">
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background: var(--success);"></div>
+                                    <span>Low Risk</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background: var(--warning);"></div>
+                                    <span>Moderate</span>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background: var(--danger);"></div>
+                                    <span>High Risk</span>
+                                </div>
+                            </div>
+                        </div>
+                        <span>🗺️ Interactive Map: Kathmandu → Pokhara</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Analyses -->
+            <div class="card full-width-section">
+                <div class="card-header">
+                    <h2 class="card-title">Recent Analyses</h2>
+                    <a href="#" class="card-action">View All →</a>
+                </div>
+
+                <div class="recent-analyses">
+                    <div class="analysis-item">
+                        <span class="analysis-date">Apr 25, 2026</span>
+                        <span class="analysis-route">Kathmandu → Pokhara</span>
+                        <span class="analysis-risk risk-badge moderate">68% Moderate</span>
+                        <a href="#" class="view-btn">View</a>
+                    </div>
+
+                    <div class="analysis-item">
+                        <span class="analysis-date">Apr 24, 2026</span>
+                        <span class="analysis-route">Pokhara → Chitwan</span>
+                        <span class="analysis-risk risk-badge low">32% Low</span>
+                        <a href="#" class="view-btn">View</a>
+                    </div>
+
+                    <div class="analysis-item">
+                        <span class="analysis-date">Apr 23, 2026</span>
+                        <span class="analysis-route">Kathmandu → Mustang</span>
+                        <span class="analysis-risk risk-badge high">85% High</span>
+                        <a href="#" class="view-btn">View</a>
+                    </div>
+
+                    <div class="analysis-item">
+                        <span class="analysis-date">Apr 22, 2026</span>
+                        <span class="analysis-route">Bhaktapur → Lumbini</span>
+                        <span class="analysis-risk risk-badge low">28% Low</span>
+                        <a href="#" class="view-btn">View</a>
+                    </div>
+
+                    <div class="analysis-item">
+                        <span class="analysis-date">Apr 21, 2026</span>
+                        <span class="analysis-route">Kathmandu → Ilam</span>
+                        <span class="analysis-risk risk-badge moderate">61% Moderate</span>
+                        <a href="#" class="view-btn">View</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Analyze Route Function
+        function analyzeRoute() {
+            const riskResult = document.getElementById('risk-result');
+            const riskPercentage = document.getElementById('risk-percentage');
+            const riskBadge = document.getElementById('risk-badge');
+            
+            // Simulate analysis with random risk
+            const risk = Math.floor(Math.random() * 60) + 30; // 30-90%
+            
+            // Show loading state
+            riskResult.style.display = 'block';
+            riskPercentage.textContent = '...';
+            
+            // Simulate API delay
+            setTimeout(() => {
+                riskPercentage.textContent = risk + '%';
+                
+                // Update badge based on risk level
+                if (risk < 40) {
+                    riskBadge.textContent = 'Low Risk';
+                    riskBadge.className = 'risk-badge low';
+                } else if (risk < 70) {
+                    riskBadge.textContent = 'Moderate Risk';
+                    riskBadge.className = 'risk-badge moderate';
+                } else {
+                    riskBadge.textContent = 'High Risk';
+                    riskBadge.className = 'risk-badge high';
+                }
+                
+                // Animate factor bars
+                const factors = document.querySelectorAll('.factor-fill');
+                factors.forEach((factor, index) => {
+                    const randomWidth = Math.floor(Math.random() * 60) + 20;
+                    setTimeout(() => {
+                        factor.style.width = randomWidth + '%';
+                    }, index * 150);
+                });
+            }, 800);
+        }
+
+        // Slider update functions
+        function updateRainfall(value) {
+            document.getElementById('rainfall-value').textContent = value + ' mm/h';
+            updateSimulatedRisk();
+        }
+
+        function updateTemp(value) {
+            document.getElementById('temp-value').textContent = value + '°C';
+            updateSimulatedRisk();
+        }
+
+        function updateWind(value) {
+            document.getElementById('wind-value').textContent = value + ' km/h';
+            updateSimulatedRisk();
+        }
+
+        function updateSimulatedRisk() {
+            const rainfall = parseInt(document.getElementById('rainfall-slider').value);
+            const temp = parseInt(document.getElementById('temp-slider').value);
+            const wind = parseInt(document.getElementById('wind-slider').value);
+            
+            // Simple risk calculation based on parameters
+            const baseRisk = 68;
+            const rainfallImpact = (rainfall - 50) * 0.3;
+            const tempImpact = (temp - 22) * 0.2;
+            const windImpact = (wind - 15) * 0.15;
+            
+            const newRisk = Math.max(10, Math.min(95, Math.round(baseRisk + rainfallImpact + tempImpact + windImpact)));
+            
+            document.getElementById('simulated-risk').textContent = newRisk + '%';
+            
+            const change = newRisk - baseRisk;
+            const changeElement = document.getElementById('risk-change');
+            if (change > 0) {
+                changeElement.textContent = '+' + change + '% ↑';
+                changeElement.style.color = 'var(--danger)';
+            } else if (change < 0) {
+                changeElement.textContent = change + '% ↓';
+                changeElement.style.color = 'var(--success)';
+            } else {
+                changeElement.textContent = 'No change';
+                changeElement.style.color = 'var(--text-light)';
+            }
+        }
+
+        function runSimulation() {
+            // Add visual feedback for simulation running
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.textContent = 'Running...';
+            btn.disabled = true;
+            
+            setTimeout(() => {
+                btn.textContent = '✓ Simulation Complete';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.disabled = false;
+                }, 1500);
+            }, 1000);
+        }
+
+        // Initialize with current risk display
+        window.addEventListener('load', () => {
+            updateSimulatedRisk();
+        });
+    </script>
+</body>
+</html>
